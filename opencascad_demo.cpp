@@ -63,7 +63,7 @@ typedef unsigned char uchar8;
 typedef unsigned int  uchar32;
 typedef unsigned long uchar64;
 
-#define DEV_LOG
+//#define DEV_LOG
 
 void print_shape_type(const TopoDS_Shape& sh)
 {
@@ -314,6 +314,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 	int w_ind = 0;
     for(TopExp_Explorer w(res, TopAbs_WIRE); w.More(); w.Next())
 	{
+#ifdef DEV_LOG			
 		printf("\nWire: %d\n", w_ind);
 		
 		if (!w_ind)
@@ -324,6 +325,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 		{
 			fprintf(ouput_file, "hole\n");
 		}
+#endif		
 		++w_ind;				
 		int e_ind = 0;
 		TopLoc_Location L;
