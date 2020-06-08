@@ -1,0 +1,3 @@
+border
+arc_degrees 0 0 1 0 180
+segment -1 0 1 0

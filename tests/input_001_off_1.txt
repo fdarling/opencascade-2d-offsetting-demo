@@ -1,0 +1,5 @@
+border
+segment 1 1 1  4.5
+segment 1 4.5 3 4.5
+segment 3   4.5 3 1
+segment 3 1 1 1

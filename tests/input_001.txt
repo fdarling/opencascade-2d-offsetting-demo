@@ -1,0 +1,5 @@
+border
+segment 0 0 0  3.5
+segment 0 3.5 2 3.5
+segment 2   3.5 2 0
+segment 2 0 0 0

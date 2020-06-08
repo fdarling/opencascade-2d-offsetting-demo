@@ -1,0 +1,5 @@
+border
+segment 10.5 10.5 11 10.5
+segment 11 10.5 11 11
+segment 11 11 10.5 11
+segment 10.5 11 10.5 10.5
