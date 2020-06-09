@@ -240,7 +240,7 @@ bool collect_segemets_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
 				p1.SetX(p1.X() + arc_data[2]);
 				pm.SetY(pm.Y() + arc_data[2]);
 				
-				Handle(Geom_Curve) arc = GC_MakeCircle(p0, pm, p1).Value();
+				Handle(Geom_Circle) arc = GC_MakeCircle(p0, pm, p1).Value();
 				edge = BRepBuilderAPI_MakeEdge(arc);
 			}
 			
