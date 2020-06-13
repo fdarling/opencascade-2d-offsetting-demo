@@ -376,7 +376,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 				double angle_start, angle_end;
 				get_arc_info(center, p0, m, p1, angle_start, angle_end);
 #ifdef DEV_LOG	
-				printf("cicle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
+				printf("circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
 				printf("angle_start=%lf angle_end=%lf\n", angle_start, angle_end);
 #endif				
 				fprintf(ouput_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);
@@ -402,7 +402,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 					double angle_start, angle_end;
 					get_arc_info(center, p0, m, p1, angle_start, angle_end);
 #ifdef DEV_LOG						
-					printf("trmmed cicle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
+					printf("trmmed circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
 					printf("trimmed angle_start=%lf angle_end=%lf\n", angle_start, angle_end);
 #endif					
 					fprintf(ouput_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);						
