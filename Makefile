@@ -28,8 +28,10 @@ LFLAGS = \
 SOURCES = \
 	opencascade_demo.cpp
 
-all:
+$(TARGET): $(SOURCES)
 	$(CXX) $(SOURCES) -o $(TARGET) $(CFLAGS) $(LFLAGS)
+
+all: $(TARGET)
 
 clean:
 	rm -f $(TARGET)
