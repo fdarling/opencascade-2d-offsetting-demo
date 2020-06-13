@@ -316,7 +316,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 	{
 #ifdef DEV_LOG			
 		printf("\nWire: %d\n", w_ind);
-		
+#endif
 		if (!w_ind)
 		{
 			fprintf(ouput_file, "border\n");
@@ -325,7 +325,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 		{
 			fprintf(ouput_file, "hole\n");
 		}
-#endif		
+
 		++w_ind;				
 		int e_ind = 0;
 		TopLoc_Location L;
