@@ -49,42 +49,10 @@
 #include <string>
 #include <fstream>
 
+#include "arc_info.h"
 #include "collect_segments.h"
 
 typedef std::vector<std::string> string_vector;
-
-void print_shape_type(const TopoDS_Shape& sh)
-{
-    if (sh.ShapeType() == TopAbs_FACE)
-    {
-        printf("Shape type is TopAbs_FACE\n");
-    }
-    else
-    if (sh.ShapeType() == TopAbs_COMPSOLID)
-    {
-        printf("Shape type is TopAbs_COMPSOLID\n");
-    }
-    else
-    if (sh.ShapeType() == TopAbs_COMPOUND)
-    {
-        printf("Shape type is TopAbs_COMPOUND\n");
-    }
-    else
-    if (sh.ShapeType() == TopAbs_WIRE)
-    {
-        printf("Shape type is TopAbs_WIRE\n");
-    }
-    else
-    if (sh.ShapeType() == TopAbs_EDGE)
-    {
-        printf("Shape type is TopAbs_EDGE\n");
-    }
-    else
-    if (sh.ShapeType() == TopAbs_VERTEX)
-    {
-        printf("Shape type is TopAbs_VERTEX\n");
-    }
-}
 
 bool read_input_file(const char * path, std::vector<string_vector>& res)
 {
@@ -123,49 +91,6 @@ bool read_input_file(const char * path, std::vector<string_vector>& res)
     else
     {
         return false;
-    }
-}
-
-void get_arc_info(const gp_Pnt & center, const gp_Pnt & f, const gp_Pnt & m, const gp_Pnt & l, double& angle_start, double& angle_end)
-{
-    angle_start = atan2(f.Y() - center.Y(), f.X() - center.X());
-    double angle_mid   = atan2(m.Y() - center.Y(), m.X() - center.X());
-    angle_end   = atan2(l.Y() - center.Y(), l.X() - center.X());
-#ifdef DEV_LOG
-    printf("angle_start: %lf angle_mid: %lf angle_end: %lf diff: %lf\n", angle_start, angle_mid, angle_end, abs(angle_start - angle_end));
-#endif
-    double v = abs(angle_start - angle_end);
-    double t = 0.00001;
-    if ((v > t) && (v < 2 * M_PI - t))
-    {
-        //puts("CASE A");
-        if (angle_start < 0)
-        {
-            angle_start += 2 * M_PI;
-        }
-        if (angle_end < 0)
-        {
-            angle_end += 2 * M_PI;
-        }
-        if (angle_start > angle_end)
-        {
-            std::swap(angle_start, angle_end);
-        }
-        if (angle_mid < 0)
-        {
-            angle_mid += 2 * M_PI;
-        }
-
-        if (angle_mid < angle_start || angle_mid > angle_end)
-        {
-            std::swap(angle_start, angle_end);
-        }
-    }
-    else
-    {
-        //puts("CASE B");
-        angle_start = 0;
-        angle_end = 2 * M_PI;
     }
 }
 
@@ -294,40 +219,6 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * output_file)
     }
 
 }
-
-int get_num_borders(const std::vector<string_vector>& segments_arcs)
-{
-    int num_borders = 0;
-    int num_holes = 0;
-    for (size_t i = 0; i < segments_arcs.size(); ++i)
-    {
-        if (!segments_arcs[i].size())
-        {
-            continue;
-        }
-        if (segments_arcs[i][0] == "border")
-        {
-            ++num_borders;
-            if (num_borders > 1)
-            {
-                printf("FATAL ERROR: multiple borders is not supported\n");
-                return -1;
-            }
-        }
-        else
-        if (segments_arcs[i][0] == "hole")
-        {
-            ++num_holes;
-        }
-    }
-    if (!num_borders)
-    {
-        printf("FATAL ERROR: border is missing\n");
-        return -1;
-    }
-    return num_borders + num_holes;
-}
-
 
 int handle_offset(int argc, const char ** argv)
 {

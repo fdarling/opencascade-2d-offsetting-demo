@@ -26,6 +26,7 @@ LFLAGS = \
 	-lTKShHealing
 
 SOURCES = \
+	src/arc_info.cpp \
 	src/collect_segments.cpp \
 	src/main.cpp
 
