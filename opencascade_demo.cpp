@@ -138,25 +138,26 @@ bool read_input_file(const char * path, std::vector<vector_strings>& res)
 	}
 }
 
-bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<vector_strings>& segments_arcs)
-{	
+bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<vector_strings> & lines)
+{
 	int b_ind = 0;
-	for (size_t i = 0; i < segments_arcs.size(); ++i)
+	for (std::vector<vector_strings>::size_type line = 0; line < lines.size(); ++line)
 	{
-		if (segments_arcs[i][0] == "segment")
+		const vector_strings &words = lines[line];
+		if (words[0] == "segment")
 		{
-			if (segments_arcs[i].size() != 5)
+			if (words.size() != 5)
 			{
-				printf("line %zu with segment data must contain 5 entries, but only %lu found.\n", i, segments_arcs[i].size());
+				printf("line %zu with segment data must contain 5 entries, but only %lu found.\n", line, words.size());
 				return false;
 			}
 			
 			double pts[4];
 			for (size_t j = 1; j < 5; ++j)
 			{
-				if (sscanf(segments_arcs[i][j].c_str(), "%lf", &pts[j - 1]) != 1)
+				if (sscanf(words[j].c_str(), "%lf", &pts[j - 1]) != 1)
 				{
-					printf("line %zu with segment data invalid double entry in pos %zu\n", i, j);
+					printf("line %zu with segment data invalid double entry in pos %zu\n", line, j);
 					return false;
 				}
 			}			
@@ -165,26 +166,26 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
 			borders[b_ind].Add(edge);			
 		}
 		else
-		if (segments_arcs[i][0] == "arc" || segments_arcs[i][0] == "arc_degrees")
+		if (words[0] == "arc" || words[0] == "arc_degrees")
 		{
-			if (segments_arcs[i].size() != 6)
+			if (words.size() != 6)
 			{
-				printf("line %zu with arc data must contain 6 entries, but only %lu found.\n", i, segments_arcs[i].size());
+				printf("line %zu with arc data must contain 6 entries, but only %lu found.\n", line, words.size());
 				return false;
 			}			
 			// c_x c_y R angle_start angle_end
 			double arc_data[5];
 			for (size_t j = 1; j < 6; ++j)
 			{
-				if (sscanf(segments_arcs[i][j].c_str(), "%lf", &arc_data[j - 1]) != 1)
+				if (sscanf(words[j].c_str(), "%lf", &arc_data[j - 1]) != 1)
 				{
-					printf("line %zu with arc data invalid double entry in pos %zu\n", i, j);
+					printf("line %zu with arc data invalid double entry in pos %zu\n", line, j);
 					return false;
 				}
 			}	
 			bool full_circle = false;
 			
-			if (segments_arcs[i][0] == "arc_degrees")
+			if (words[0] == "arc_degrees")
 			{
 				if (abs(arc_data[3] - arc_data[4]) == 360)
 				{
@@ -247,7 +248,7 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
 			borders[b_ind].Add(edge);
 		}
 		else 
-		if (segments_arcs[i][0] == "hole")
+		if (words[0] == "hole")
 		{
 			++b_ind;
 		}
