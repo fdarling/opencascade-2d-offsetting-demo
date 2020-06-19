@@ -138,7 +138,7 @@ bool read_input_file(const char * path, std::vector<vector_strings>& res)
 	}
 }
 
-bool collect_segemets_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<vector_strings>& segments_arcs)
+bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<vector_strings>& segments_arcs)
 {	
 	int b_ind = 0;
 	for (size_t i = 0; i < segments_arcs.size(); ++i)
@@ -517,9 +517,9 @@ int handle_offset(int argc, const char ** argv)
 		
 	std::vector<BRepBuilderAPI_MakeWire> borders(num_borders);
 	
-	if (!collect_segemets_arcs_to_wires(borders, segments_arcs))
+	if (!collect_segments_arcs_to_wires(borders, segments_arcs))
 	{
-		printf("FATAL ERROR: collect_segemets_arcs_to_wires invalid data in input file %s\n", argv[1]);
+		printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", argv[1]);
 		return false;
 	}
 	
@@ -578,9 +578,9 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
 		
 	std::vector<BRepBuilderAPI_MakeWire> borders(num_borders);
 	
-	if (!collect_segemets_arcs_to_wires(borders, segments_arcs))
+	if (!collect_segments_arcs_to_wires(borders, segments_arcs))
 	{
-		printf("FATAL ERROR: collect_segemets_arcs_to_wires invalid data in input file %s\n", path);
+		printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", path);
 		return false;
 	}
 	
@@ -716,8 +716,8 @@ int main(int argc, const char ** argv)
 	
 	if (argc != 6)
 	{
-		printf("Usage A: opercascad_demo offset input_file output_file offset_value offset_type\noffset_type must be one of [arc, tangent, intersection]\n");
-		printf("Usage B: opercascad_demo booleans input_file_1 input_file_2 output_file boolean_type\nboolean_type must be one of [union, intersection, difference, difference_reversed]\n");
+		printf("Usage A: opencascade_demo offset input_file output_file offset_value offset_type\noffset_type must be one of [arc, tangent, intersection]\n");
+		printf("Usage B: opencascade_demo booleans input_file_1 input_file_2 output_file boolean_type\nboolean_type must be one of [union, intersection, difference, difference_reversed]\n");
 		exit(-1);
 	}
 	
