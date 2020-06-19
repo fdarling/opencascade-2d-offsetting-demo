@@ -26,6 +26,7 @@ LFLAGS = \
 	-lTKShHealing
 
 SOURCES = \
+	src/collect_segments.cpp \
 	src/main.cpp
 
 $(TARGET): $(SOURCES)
