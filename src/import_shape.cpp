@@ -1,10 +1,14 @@
 #include "import_shape.h"
 
+#include <gp_Pln.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeCircle.hxx>
+#include <TopoDS_Wire.hxx>
+#include <TopoDS_Face.hxx>
 
 int get_num_borders(const std::vector<string_vector> & segments_arcs)
 {
@@ -165,4 +169,90 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
         }
     }
     return true;
+}
+
+bool load_face_from(const char * path, TopoDS_Shape & res)
+{
+    std::vector<string_vector> segments_arcs;
+    if (!read_input_file(path, segments_arcs))
+    {
+        printf("FATAL ERROR: can not open input file %s\n", path);
+        return false;
+    }
+
+    if (!segments_arcs.size())
+    {
+        printf("FATAL ERROR: file %s is empty\n", path);
+        return false;
+    }
+
+    int num_borders = get_num_borders(segments_arcs);
+
+    if (num_borders == -1)
+    {
+        printf("FATAL ERROR: get_num_borders invalid data in input file %s\n", path);
+        return false;
+    }
+
+    std::vector<BRepBuilderAPI_MakeWire> borders(num_borders);
+
+    if (!collect_segments_arcs_to_wires(borders, segments_arcs))
+    {
+        printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", path);
+        return false;
+    }
+
+    BRepBuilderAPI_MakeFace builder(gp_Pln(), borders[0], true);
+
+    for (size_t i = 1; i < borders.size(); ++i)
+    {
+        builder.Add(borders[i]);
+    }
+    if (!builder.IsDone())
+    {
+        printf("FATAL ERROR: cBRepBuilderAPI_MakeFace.isDone input file %s\n", path);
+        return false;
+    }
+    res = builder.Face();
+    return true;
+}
+
+bool read_input_file(const char * path, std::vector<string_vector> & res)
+{
+    res.clear();
+    std::ifstream file(path);
+    if (file.is_open())
+    {
+        std::string line;
+        while (std::getline(file, line))
+        {
+            if (!line.length())
+            {
+                continue;
+            }
+            res.push_back(string_vector());
+            size_t prev = 0, pos = 0;
+            do
+            {
+                pos = line.find(" ", prev);
+                if (pos == std::string::npos)
+                {
+                    pos = line.length();
+                }
+                std::string token = line.substr(prev, pos - prev);
+                if (!token.empty())
+                {
+                    res.back().push_back(token);
+                }
+                prev = pos + 1;
+            }
+            while (pos < line.length() && prev < line.length());
+        }
+        file.close();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
