@@ -6,6 +6,39 @@
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeCircle.hxx>
 
+int get_num_borders(const std::vector<string_vector> & segments_arcs)
+{
+    int num_borders = 0;
+    int num_holes = 0;
+    for (size_t i = 0; i < segments_arcs.size(); ++i)
+    {
+        if (!segments_arcs[i].size())
+        {
+            continue;
+        }
+        if (segments_arcs[i][0] == "border")
+        {
+            ++num_borders;
+            if (num_borders > 1)
+            {
+                printf("FATAL ERROR: multiple borders is not supported\n");
+                return -1;
+            }
+        }
+        else
+        if (segments_arcs[i][0] == "hole")
+        {
+            ++num_holes;
+        }
+    }
+    if (!num_borders)
+    {
+        printf("FATAL ERROR: border is missing\n");
+        return -1;
+    }
+    return num_borders + num_holes;
+}
+
 bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<string_vector> & lines)
 {
     int b_ind = 0;
