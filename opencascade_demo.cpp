@@ -51,19 +51,11 @@
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 
-using namespace std;
-
 #include <vector>
 #include <string>
 #include <fstream>
 
-typedef std::vector<std::string> vector_strings;
-
-typedef unsigned char uchar8;
-typedef unsigned int  uchar32;
-typedef unsigned long uchar64;
-
-//#define DEV_LOG
+typedef std::vector<std::string> string_vector;
 
 void print_shape_type(const TopoDS_Shape& sh)
 {
@@ -98,7 +90,7 @@ void print_shape_type(const TopoDS_Shape& sh)
     }
 }
 
-bool read_input_file(const char * path, std::vector<vector_strings>& res)
+bool read_input_file(const char * path, std::vector<string_vector>& res)
 {
     res.clear();
     std::ifstream file(path);
@@ -111,12 +103,12 @@ bool read_input_file(const char * path, std::vector<vector_strings>& res)
             {
                 continue;
             }
-            res.push_back(vector_strings());
+            res.push_back(string_vector());
             size_t prev = 0, pos = 0;
             do
             {
                 pos = line.find(" ", prev);
-                if (pos == string::npos)
+                if (pos == std::string::npos)
                 {
                     pos = line.length();
                 }
@@ -138,12 +130,12 @@ bool read_input_file(const char * path, std::vector<vector_strings>& res)
     }
 }
 
-bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<vector_strings> & lines)
+bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<string_vector> & lines)
 {
     int b_ind = 0;
-    for (std::vector<vector_strings>::size_type line = 0; line < lines.size(); ++line)
+    for (std::vector<string_vector>::size_type line = 0; line < lines.size(); ++line)
     {
-        const vector_strings &words = lines[line];
+        const string_vector &words = lines[line];
         if (words[0] == "segment")
         {
             if (words.size() != 5)
@@ -436,7 +428,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * output_file)
 
 }
 
-int get_num_borders(const std::vector<vector_strings>& segments_arcs)
+int get_num_borders(const std::vector<string_vector>& segments_arcs)
 {
     int num_borders = 0;
     int num_holes = 0;
@@ -502,7 +494,7 @@ int handle_offset(int argc, const char ** argv)
         exit(-1);
     }
 
-    std::vector<vector_strings> segments_arcs;
+    std::vector<string_vector> segments_arcs;
     if (!read_input_file(argv[1], segments_arcs))
     {
         printf("FATAL ERROR: can not open input file %s\n", argv[1]);
@@ -556,7 +548,7 @@ int handle_offset(int argc, const char ** argv)
 
 bool load_face_from(const char * path, TopoDS_Shape & res)
 {
-    std::vector<vector_strings> segments_arcs;
+    std::vector<string_vector> segments_arcs;
     if (!read_input_file(path, segments_arcs))
     {
         printf("FATAL ERROR: can not open input file %s\n", path);
