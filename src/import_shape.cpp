@@ -1,4 +1,4 @@
-#include "collect_segments.h"
+#include "import_shape.h"
 
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
