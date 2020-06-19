@@ -26,7 +26,7 @@ LFLAGS = \
 	-lTKShHealing
 
 SOURCES = \
-	opencascade_demo.cpp
+	src/main.cpp
 
 $(TARGET): $(SOURCES)
 	$(CXX) $(SOURCES) -o $(TARGET) $(CFLAGS) $(LFLAGS)
