@@ -27,7 +27,7 @@ LFLAGS = \
 
 SOURCES = \
 	src/arc_info.cpp \
-	src/collect_segments.cpp \
+	src/import_shape.cpp \
 	src/export_shape.cpp \
 	src/main.cpp
 

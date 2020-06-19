@@ -44,7 +44,7 @@
 #include <fstream>
 
 #include "arc_info.h"
-#include "collect_segments.h"
+#include "import_shape.h"
 #include "export_shape.h"
 
 typedef std::vector<std::string> string_vector;
