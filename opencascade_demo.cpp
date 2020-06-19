@@ -310,7 +310,7 @@ void get_arc_info(const gp_Pnt & center, const gp_Pnt & f, const gp_Pnt & m, con
 	}
 }
 	
-void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
+void append_wires_to_file(const TopoDS_Shape& res, FILE * output_file)
 {	
 	int w_ind = 0;
     for(TopExp_Explorer w(res, TopAbs_WIRE); w.More(); w.Next())
@@ -320,11 +320,11 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 #endif
 		if (!w_ind)
 		{
-			fprintf(ouput_file, "border\n");
+			fprintf(output_file, "border\n");
 		}
 		else
 		{
-			fprintf(ouput_file, "hole\n");
+			fprintf(output_file, "hole\n");
 		}
 
 		++w_ind;				
@@ -367,7 +367,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 #ifdef DEV_LOG					
 				printf("segment detected! %f %f %f %f\n", p0.X(), p0.Y(), p1.X(), p1.Y());
 #endif				
-				fprintf(ouput_file, "segment %.17g %.17g %.17g %.17g\n", p0.X(), p0.Y(), p1.X(), p1.Y());
+				fprintf(output_file, "segment %.17g %.17g %.17g %.17g\n", p0.X(), p0.Y(), p1.X(), p1.Y());
 	        }
 			else
 			if(curve->DynamicType() == STANDARD_TYPE(Geom_Circle))
@@ -380,7 +380,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 				printf("circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
 				printf("angle_start=%lf angle_end=%lf\n", angle_start, angle_end);
 #endif				
-				fprintf(ouput_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);
+				fprintf(output_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);
 								
 			}
 			else
@@ -393,7 +393,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 #ifdef DEV_LOG						
 					printf("segment detected! %f %f %f %f\n", p0.X(), p0.Y(), p1.X(), p1.Y());
 #endif					
-					fprintf(ouput_file, "segment %.17g %.17g %.17g %.17g\n", p0.X(), p0.Y(), p1.X(), p1.Y());
+					fprintf(output_file, "segment %.17g %.17g %.17g %.17g\n", p0.X(), p0.Y(), p1.X(), p1.Y());
 				}
 				else
 				if (trimmed->BasisCurve()->DynamicType() == STANDARD_TYPE(Geom_Circle))
@@ -406,7 +406,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * ouput_file)
 					printf("trmmed circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
 					printf("trimmed angle_start=%lf angle_end=%lf\n", angle_start, angle_end);
 #endif					
-					fprintf(ouput_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);						
+					fprintf(output_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);						
 				}
 				else
 				{
