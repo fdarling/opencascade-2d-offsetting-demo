@@ -157,7 +157,7 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
             {
                 if (sscanf(words[j].c_str(), "%lf", &pts[j - 1]) != 1)
                 {
-                    printf("line %zu with segment data invalid double entry in pos %zu\n", line, j);
+                    printf("line %zu with segment data has invalid number in field %zu\n", line, j);
                     return false;
                 }
             }
@@ -179,7 +179,7 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
             {
                 if (sscanf(words[j].c_str(), "%lf", &arc_data[j - 1]) != 1)
                 {
-                    printf("line %zu with arc data invalid double entry in pos %zu\n", line, j);
+                    printf("line %zu with arc data has invalid number in field %zu\n", line, j);
                     return false;
                 }
             }
@@ -403,7 +403,7 @@ void append_wires_to_file(const TopoDS_Shape& res, FILE * output_file)
                     double angle_start, angle_end;
                     get_arc_info(center, p0, m, p1, angle_start, angle_end);
 #ifdef DEV_LOG
-                    printf("trmmed circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
+                    printf("trimmed circle detected! R=%f P.x=%f P.y=%f F.x=%f F.y=%f m.x=%f m.y=%f L.x=%f L.y=%f\n", circle->Radius(), center.X(), center.Y(), p0.X(), p0.Y(), m.X(), m.Y(), p1.X(), p1.Y());
                     printf("trimmed angle_start=%lf angle_end=%lf\n", angle_start, angle_end);
 #endif
                     fprintf(output_file, "arc %.17g %.17g %.17g %.17g %.17g\n", center.X(), center.Y(), circle->Radius(), angle_start, angle_end);
@@ -451,7 +451,7 @@ int get_num_borders(const std::vector<vector_strings>& segments_arcs)
             ++num_borders;
             if (num_borders > 1)
             {
-                printf("FATAL ERROR: mutiple borders is not supported\n");
+                printf("FATAL ERROR: multiple borders is not supported\n");
                 return -1;
             }
         }
