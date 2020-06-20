@@ -84,15 +84,8 @@ int handle_offset(int argc, const char ** argv)
         printf("FATAL ERROR: can not open input file %s\n", argv[1]);
         return false;
     }
-    int num_borders = get_num_borders(segments_arcs);
 
-    if (num_borders == -1)
-    {
-        printf("FATAL ERROR: invalid data in input file %s\n", argv[1]);
-        return false;
-    }
-
-    std::vector<BRepBuilderAPI_MakeWire> borders(num_borders);
+    std::vector<TopoDS_Wire> borders;
 
     if (!collect_segments_arcs_to_wires(borders, segments_arcs))
     {

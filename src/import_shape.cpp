@@ -10,43 +10,12 @@
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
 
-int get_num_borders(const std::vector<string_vector> & segments_arcs)
-{
-    int num_borders = 0;
-    int num_holes = 0;
-    for (size_t i = 0; i < segments_arcs.size(); ++i)
-    {
-        if (!segments_arcs[i].size())
-        {
-            continue;
-        }
-        if (segments_arcs[i][0] == "border")
-        {
-            ++num_borders;
-            if (num_borders > 1)
-            {
-                printf("FATAL ERROR: multiple borders is not supported\n");
-                return -1;
-            }
-        }
-        else
-        if (segments_arcs[i][0] == "hole")
-        {
-            ++num_holes;
-        }
-    }
-    if (!num_borders)
-    {
-        printf("FATAL ERROR: border is missing\n");
-        return -1;
-    }
-    return num_borders + num_holes;
-}
-
-bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borders, const std::vector<string_vector> & lines)
+bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const std::vector<string_vector> & lines)
 {
     int b_ind = 0;
-    for (std::vector<string_vector>::size_type line = 0; line < lines.size(); ++line)
+    BRepBuilderAPI_MakeWire wire_builder;
+    std::vector<string_vector>::size_type line = 0;
+    for (; line < lines.size(); ++line)
     {
         const string_vector &words = lines[line];
         if (words[0] == "segment")
@@ -68,7 +37,7 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
             }
             TopoDS_Vertex vtxs[2] = {BRepBuilderAPI_MakeVertex(gp_Pnt(pts[0], pts[1], 0)), BRepBuilderAPI_MakeVertex(gp_Pnt(pts[2], pts[3], 0))};
             TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(vtxs[0], vtxs[1]);
-            borders[b_ind].Add(edge);
+            wire_builder.Add(edge);
         }
         else
         if (words[0] == "arc" || words[0] == "arc_degrees")
@@ -150,24 +119,27 @@ bool collect_segments_arcs_to_wires(std::vector<BRepBuilderAPI_MakeWire> & borde
                 edge = BRepBuilderAPI_MakeEdge(arc);
             }
 
-            borders[b_ind].Add(edge);
+            wire_builder.Add(edge);
         }
         else
         if (words[0] == "hole")
         {
-            ++b_ind;
+            if (!wire_builder.IsDone())
+            {
+                printf("wire_builder.IsDone() failed after processing line %zu", line);
+                return false;
+            }
+            borders.push_back(wire_builder.Wire());
+            wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
         }
     }
 
-    for (size_t i = 0; i < borders.size(); ++i)
+    if (!wire_builder.IsDone())
     {
-        bool res = borders[i].IsDone();
-        if (!res)
-        {
-            printf("borders[i].IsDone() failed for i=%zu\n", i);
-            return false;
-        }
+        printf("wire_builder.IsDone() failed after processing line %zu", line);
+        return false;
     }
+    borders.push_back(wire_builder.Wire());
     return true;
 }
 
@@ -186,15 +158,7 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
         return false;
     }
 
-    int num_borders = get_num_borders(segments_arcs);
-
-    if (num_borders == -1)
-    {
-        printf("FATAL ERROR: get_num_borders invalid data in input file %s\n", path);
-        return false;
-    }
-
-    std::vector<BRepBuilderAPI_MakeWire> borders(num_borders);
+    std::vector<TopoDS_Wire> borders;
 
     if (!collect_segments_arcs_to_wires(borders, segments_arcs))
     {
