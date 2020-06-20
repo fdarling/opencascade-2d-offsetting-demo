@@ -145,14 +145,14 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
 
 bool load_face_from(const char * path, TopoDS_Shape & res)
 {
-    std::vector<string_vector> segments_arcs;
-    if (!read_input_file(path, segments_arcs))
+    std::vector<string_vector> lines;
+    if (!read_input_file(path, lines))
     {
         printf("FATAL ERROR: can not open input file %s\n", path);
         return false;
     }
 
-    if (!segments_arcs.size())
+    if (!lines.size())
     {
         printf("FATAL ERROR: file %s is empty\n", path);
         return false;
@@ -160,7 +160,7 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
 
     std::vector<TopoDS_Wire> borders;
 
-    if (!collect_segments_arcs_to_wires(borders, segments_arcs))
+    if (!collect_segments_arcs_to_wires(borders, lines))
     {
         printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", path);
         return false;
