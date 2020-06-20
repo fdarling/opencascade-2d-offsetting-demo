@@ -15,6 +15,7 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
     int b_ind = 0;
     BRepBuilderAPI_MakeWire wire_builder;
     std::vector<string_vector>::size_type line = 0;
+    int segment_count = 0;
     for (; line < lines.size(); ++line)
     {
         const string_vector &words = lines[line];
@@ -38,6 +39,7 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
             TopoDS_Vertex vtxs[2] = {BRepBuilderAPI_MakeVertex(gp_Pnt(pts[0], pts[1], 0)), BRepBuilderAPI_MakeVertex(gp_Pnt(pts[2], pts[3], 0))};
             TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(vtxs[0], vtxs[1]);
             wire_builder.Add(edge);
+            segment_count++;
         }
         else
         if (words[0] == "arc" || words[0] == "arc_degrees")
@@ -120,23 +122,45 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
             }
 
             wire_builder.Add(edge);
+            segment_count++;
+        }
+        else
+        if (words[0] == "border")
+        {
+            if (segment_count)
+            {
+                if (!wire_builder.IsDone())
+                {
+                    printf("wire_builder.IsDone() failed after processing line %zu\n", line);
+                    return false;
+                }
+                borders.push_back(wire_builder.Wire());
+                wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
+                segment_count = 0;
+            }
         }
         else
         if (words[0] == "hole")
         {
+            if (!segment_count)
+            {
+                printf("attempting to add a hole without first specifying a border on line %zu\n", line);
+                return false;
+            }
             if (!wire_builder.IsDone())
             {
-                printf("wire_builder.IsDone() failed after processing line %zu", line);
+                printf("wire_builder.IsDone() failed after processing line %zu\n", line);
                 return false;
             }
             borders.push_back(wire_builder.Wire());
             wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
+            segment_count = 0;
         }
     }
 
     if (!wire_builder.IsDone())
     {
-        printf("wire_builder.IsDone() failed after processing line %zu", line);
+        printf("wire_builder.IsDone() failed after processing line %zu\n", line);
         return false;
     }
     borders.push_back(wire_builder.Wire());
