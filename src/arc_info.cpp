@@ -8,9 +8,9 @@ void get_arc_info(const gp_Pnt & center, const gp_Pnt & f, const gp_Pnt & m, con
     double angle_mid   = atan2(m.Y() - center.Y(), m.X() - center.X());
     angle_end   = atan2(l.Y() - center.Y(), l.X() - center.X());
 #ifdef DEV_LOG
-    printf("angle_start: %lf angle_mid: %lf angle_end: %lf diff: %lf\n", angle_start, angle_mid, angle_end, abs(angle_start - angle_end));
+    printf("angle_start: %lf angle_mid: %lf angle_end: %lf diff: %lf\n", angle_start, angle_mid, angle_end, std::abs(angle_start - angle_end));
 #endif
-    double v = abs(angle_start - angle_end);
+    double v = std::abs(angle_start - angle_end);
     double t = 0.00001;
     if ((v > t) && (v < 2 * M_PI - t))
     {

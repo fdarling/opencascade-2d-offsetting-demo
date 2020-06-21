@@ -63,7 +63,7 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
 
             if (words[0] == "arc_degrees")
             {
-                if (abs(arc_data[3] - arc_data[4]) == 360)
+                if (std::abs(arc_data[3] - arc_data[4]) == 360)
                 {
                     full_circle = true;
                 }
@@ -75,7 +75,7 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
             }
             else
             {
-                if (abs(arc_data[3] - arc_data[4]) == 2 * M_PI)
+                if (std::abs(arc_data[3] - arc_data[4]) == 2 * M_PI)
                 {
                     full_circle = true;
                 }
