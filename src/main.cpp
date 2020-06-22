@@ -13,6 +13,7 @@
 
 #include <Geom2dAPI_InterCurveCurve.hxx>
 #include <BRepOffsetAPI_MakeOffset.hxx>
+#include <BRepOffsetAPI_MakeOffsetShape.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 
 #include <TopAbs_ShapeEnum.hxx>
@@ -85,30 +86,42 @@ int handle_offset(int argc, const char ** argv)
         return false;
     }
 
-    std::vector<TopoDS_Wire> borders;
+    outline_with_holes_vector borders_and_holes;
 
-    if (!collect_segments_arcs_to_wires(borders, lines))
+    if (!collect_segments_arcs_to_wires(borders_and_holes, lines))
     {
         printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", argv[1]);
         return false;
     }
 
     BRepOffsetAPI_MakeOffset off;
-    off.AddWire(borders[0]);
+    for (outline_with_holes_vector::const_iterator it = borders_and_holes.begin(); it != borders_and_holes.end(); ++it)
+    {
+        off.AddWire(it->first);
+        for (wire_vector::const_iterator hole_it = it->second.begin(); hole_it != it->second.end(); ++hole_it)
+        {
+            off.AddWire(*hole_it);
+        }
+    }
     off.Init(offset_type);
     off.Perform(offset_value);
 
+    printf("DEBUG: BRepOffsetAPI_MakeOffset::IsDone() = %i\n", (int)off.IsDone());
     const TopoDS_Shape& r = off.Shape();
+    printf("DEBUG: TopoDS_Shape::IsNull() = %i\n", (int)r.IsNull());
 
     ShapeUpgrade_UnifySameDomain su(r);
     su.Build();
     TopoDS_Shape res = su.Shape();
 
-    FILE * clear_file = fopen(argv[2], "w");
-    if (!clear_file)
     {
-        printf("FATAL ERROR: can not open output file %s\n", argv[2]);
-        return -1;
+        FILE * clear_file = fopen(argv[2], "w");
+        if (!clear_file)
+        {
+            printf("FATAL ERROR: can not open output file %s\n", argv[2]);
+            return -1;
+        }
+        fclose(clear_file);
     }
 
     FILE * file = fopen(argv[2], "w");
@@ -193,13 +206,15 @@ int handle_booleans(int argc, const char ** argv)
     su.Build();
     TopoDS_Shape res = su.Shape();
 
-    FILE * clear_file = fopen(argv[3], "w");
-    if (!clear_file)
     {
-        printf("FATAL ERROR: can not open output file %s\n", argv[3]);
-        exit(-1);
+        FILE * clear_file = fopen(argv[3], "w");
+        if (!clear_file)
+        {
+            printf("FATAL ERROR: can not open output file %s\n", argv[3]);
+            exit(-1);
+        }
+        fclose(clear_file);
     }
-    fclose(clear_file);
 
     FILE * file = fopen(argv[3], "w");
     int f_ind = 0;

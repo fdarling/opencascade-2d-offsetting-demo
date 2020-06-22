@@ -10,12 +10,48 @@
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
 
-bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const std::vector<string_vector> & lines)
+static bool attempt_finishing_wire(outline_with_holes_vector & outlines_with_holes, BRepBuilderAPI_MakeWire &wire_builder, std::vector<string_vector>::size_type line)
 {
-    int b_ind = 0;
+    // try to complete the last outline or hole
+    if (!outlines_with_holes.empty())
+    {
+        // make sure we have a valid wire to use
+        if (!wire_builder.IsDone())
+        {
+            printf("wire_builder.IsDone() failed after processing line %zu\n", line);
+            return false;
+        }
+
+        printf("wire_builder.Wire().Orientation() = %i\n", wire_builder.Wire().Orientation());
+        // store the outline
+
+        TopoDS_Wire new_wire = wire_builder.Wire();
+
+        if (outlines_with_holes.back().first.IsNull())
+        {
+            if (new_wire.Orientation() != TopAbs_FORWARD)
+            {
+                new_wire.Reverse();
+            }
+            outlines_with_holes.back().first = new_wire;
+        }
+        else // otherwise store the last hole
+        {
+            if (new_wire.Orientation() != TopAbs_REVERSED)
+            {
+                new_wire.Reverse();
+            }
+            outlines_with_holes.back().second.push_back(new_wire);
+        }
+        wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
+    }
+    return true;
+}
+
+bool collect_segments_arcs_to_wires(outline_with_holes_vector & outlines_with_holes, const std::vector<string_vector> & lines)
+{
     BRepBuilderAPI_MakeWire wire_builder;
     std::vector<string_vector>::size_type line = 0;
-    int segment_count = 0;
     for (; line < lines.size(); ++line)
     {
         const string_vector &words = lines[line];
@@ -39,7 +75,7 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
             TopoDS_Vertex vtxs[2] = {BRepBuilderAPI_MakeVertex(gp_Pnt(pts[0], pts[1], 0)), BRepBuilderAPI_MakeVertex(gp_Pnt(pts[2], pts[3], 0))};
             TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(vtxs[0], vtxs[1]);
             wire_builder.Add(edge);
-            segment_count++;
+            // segment_count++;
         }
         else
         if (words[0] == "arc" || words[0] == "arc_degrees")
@@ -122,48 +158,44 @@ bool collect_segments_arcs_to_wires(std::vector<TopoDS_Wire> & borders, const st
             }
 
             wire_builder.Add(edge);
-            segment_count++;
+            // segment_count++;
         }
         else
-        if (words[0] == "border")
+        if (words[0] == "border" || words[0] == "hole")
         {
-            if (segment_count)
+            if (!attempt_finishing_wire(outlines_with_holes, wire_builder, line))
             {
-                if (!wire_builder.IsDone())
+                printf("couldn't finish border/hole before starting another\n");
+                return false;
+            }
+
+            if (words[0] == "border")
+            {
+                // add a new (invalid/incomplete) outline in the vector
+                outlines_with_holes.push_back(outline_with_holes());
+            }
+            else // if (words[0] == "hole")
+            {
+                if (outlines_with_holes.empty())
                 {
-                    printf("wire_builder.IsDone() failed after processing line %zu\n", line);
+                    printf("attempting to add a hole without first specifying a border on line %zu\n", line);
                     return false;
                 }
-                borders.push_back(wire_builder.Wire());
-                wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
-                segment_count = 0;
+
+                // NOTE: we already checked if the outline (border) was valid in the first if block
+
+                // do nothing, we don't put invalid placeholders that will
+                // be overwritten for holes, we just append them later
+
+                // TODO set a flag so that we know if we never added any segments to the hole
             }
-        }
-        else
-        if (words[0] == "hole")
-        {
-            if (!segment_count)
-            {
-                printf("attempting to add a hole without first specifying a border on line %zu\n", line);
-                return false;
-            }
-            if (!wire_builder.IsDone())
-            {
-                printf("wire_builder.IsDone() failed after processing line %zu\n", line);
-                return false;
-            }
-            borders.push_back(wire_builder.Wire());
-            wire_builder = BRepBuilderAPI_MakeWire(); // TODO is there a better way of resetting it?
-            segment_count = 0;
         }
     }
 
-    if (!wire_builder.IsDone())
+    if (!attempt_finishing_wire(outlines_with_holes, wire_builder, line))
     {
-        printf("wire_builder.IsDone() failed after processing line %zu\n", line);
-        return false;
+        printf("couldn't finish last border/hole\n");
     }
-    borders.push_back(wire_builder.Wire());
     return true;
 }
 
@@ -182,19 +214,19 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
         return false;
     }
 
-    std::vector<TopoDS_Wire> borders;
+    outline_with_holes_vector borders_and_holes;
 
-    if (!collect_segments_arcs_to_wires(borders, lines))
+    if (!collect_segments_arcs_to_wires(borders_and_holes, lines))
     {
         printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", path);
         return false;
     }
 
-    BRepBuilderAPI_MakeFace builder(gp_Pln(), borders[0], true);
+    BRepBuilderAPI_MakeFace builder(gp_Pln(), borders_and_holes[0].first, true);
 
-    for (size_t i = 1; i < borders.size(); ++i)
+    for (wire_vector::const_iterator it = borders_and_holes[0].second.begin(); it != borders_and_holes[0].second.end(); ++it)
     {
-        builder.Add(borders[i]);
+        builder.Add(*it);
     }
     if (!builder.IsDone())
     {
