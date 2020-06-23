@@ -199,10 +199,10 @@ bool collect_segments_arcs_to_wires(outline_with_holes_vector & outlines_with_ho
     return true;
 }
 
-bool load_face_from(const char * path, TopoDS_Shape & res)
+bool load_face_from(TopoDS_Shape & res, const char * path)
 {
     std::vector<string_vector> lines;
-    if (!read_input_file(path, lines))
+    if (!read_input_file(lines, path))
     {
         printf("FATAL ERROR: can not open input file %s\n", path);
         return false;
@@ -270,7 +270,7 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
     return true;
 }
 
-bool read_input_file(const char * path, std::vector<string_vector> & res)
+bool read_input_file(std::vector<string_vector> & res, const char * path)
 {
     res.clear();
     std::ifstream file(path);

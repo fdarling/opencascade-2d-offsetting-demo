@@ -80,7 +80,7 @@ int handle_offset(int argc, const char ** argv)
     }
 
     std::vector<string_vector> lines;
-    if (!read_input_file(argv[1], lines))
+    if (!read_input_file(lines, argv[1]))
     {
         printf("FATAL ERROR: can not open input file %s\n", argv[1]);
         return false;
@@ -139,12 +139,12 @@ int handle_offset(int argc, const char ** argv)
 int handle_booleans(int argc, const char ** argv)
 {
     TopoDS_Face face_1, face_2;
-    if (!load_face_from(argv[1], face_1))
+    if (!load_face_from(face_1, argv[1]))
     {
         exit(-1);
     }
 
-    if (!load_face_from(argv[2], face_2))
+    if (!load_face_from(face_2, argv[2]))
     {
         exit(-1);
     }
