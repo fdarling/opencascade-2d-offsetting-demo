@@ -199,7 +199,7 @@ bool read_wires_from_file_lines(outline_with_holes_vector & outlines_with_holes,
     return true;
 }
 
-bool load_face_from_file(TopoDS_Shape & res, const char * path)
+bool load_face_from_file(TopoDS_Face & res, const char * path)
 {
     std::vector<string_vector> lines;
     if (!read_lines_from_file(lines, path))
@@ -261,10 +261,19 @@ bool load_face_from_file(TopoDS_Shape & res, const char * path)
                 printf("fuser.HasWarnings()\n");
                 fuser.GetReport()->Dump(std::cout);
             }
-            const TopoDS_Shape& r = fuser.Shape();
+#if 0
+            res = fuser.Shape(); // NOTE: doesn't work if target is a TopoDS_Face, but workaround below works!?
+#else
+            {
+                TopoDS_Shape &face_ref = res; // HACK: convert TopoDS_Face ref to TopoDS_Shape ref, why does this work?
+                face_ref = fuser.Shape();
+            }
+#endif
+            // TODO is ShapeUpgrade_UnifySameDomain really necessary?
+            /*const TopoDS_Shape& r = fuser.Shape();
             ShapeUpgrade_UnifySameDomain su(r);
             su.Build();
-            res = su.Shape();
+            res = su.Shape();*/
         }
     }
     return true;
