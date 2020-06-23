@@ -48,7 +48,7 @@ static bool attempt_finishing_wire(outline_with_holes_vector & outlines_with_hol
     return true;
 }
 
-bool collect_segments_arcs_to_wires(outline_with_holes_vector & outlines_with_holes, const std::vector<string_vector> & lines)
+bool read_wires_from_file_lines(outline_with_holes_vector & outlines_with_holes, const std::vector<string_vector> & lines)
 {
     BRepBuilderAPI_MakeWire wire_builder;
     std::vector<string_vector>::size_type line = 0;
@@ -199,10 +199,10 @@ bool collect_segments_arcs_to_wires(outline_with_holes_vector & outlines_with_ho
     return true;
 }
 
-bool load_face_from(TopoDS_Shape & res, const char * path)
+bool load_face_from_file(TopoDS_Shape & res, const char * path)
 {
     std::vector<string_vector> lines;
-    if (!read_input_file(lines, path))
+    if (!read_lines_from_file(lines, path))
     {
         printf("FATAL ERROR: can not open input file %s\n", path);
         return false;
@@ -216,9 +216,9 @@ bool load_face_from(TopoDS_Shape & res, const char * path)
 
     outline_with_holes_vector borders_and_holes;
 
-    if (!collect_segments_arcs_to_wires(borders_and_holes, lines))
+    if (!read_wires_from_file_lines(borders_and_holes, lines))
     {
-        printf("FATAL ERROR: collect_segments_arcs_to_wires invalid data in input file %s\n", path);
+        printf("FATAL ERROR: read_wires_from_file_lines invalid data in input file %s\n", path);
         return false;
     }
 
@@ -270,7 +270,7 @@ bool load_face_from(TopoDS_Shape & res, const char * path)
     return true;
 }
 
-bool read_input_file(std::vector<string_vector> & res, const char * path)
+bool read_lines_from_file(std::vector<string_vector> & res, const char * path)
 {
     res.clear();
     std::ifstream file(path);
