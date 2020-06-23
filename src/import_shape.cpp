@@ -9,6 +9,8 @@
 #include <GC_MakeCircle.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
 
 static bool attempt_finishing_wire(outline_with_holes_vector & outlines_with_holes, BRepBuilderAPI_MakeWire &wire_builder, std::vector<string_vector>::size_type line)
 {
@@ -22,11 +24,9 @@ static bool attempt_finishing_wire(outline_with_holes_vector & outlines_with_hol
             return false;
         }
 
-        printf("wire_builder.Wire().Orientation() = %i\n", wire_builder.Wire().Orientation());
-        // store the outline
-
         TopoDS_Wire new_wire = wire_builder.Wire();
 
+        // store the outline
         if (outlines_with_holes.back().first.IsNull())
         {
             if (new_wire.Orientation() != TopAbs_FORWARD)
@@ -222,18 +222,51 @@ bool load_face_from(const char * path, TopoDS_Shape & res)
         return false;
     }
 
-    BRepBuilderAPI_MakeFace builder(gp_Pln(), borders_and_holes[0].first, true);
+    for (outline_with_holes_vector::const_iterator it = borders_and_holes.begin(); it != borders_and_holes.end(); ++it)
+    {
+        BRepBuilderAPI_MakeFace builder(gp_Pln(), it->first, true);
+        for (wire_vector::const_iterator hole_it = it->second.begin(); hole_it != it->second.end(); ++hole_it)
+        {
+            builder.Add(*hole_it);
+        }
+        if (!builder.IsDone())
+        {
+            printf("FATAL ERROR: cBRepBuilderAPI_MakeFace.isDone input file %s\n", path);
+            return false;
+        }
+        if (it == borders_and_holes.begin())
+        {
+            res = builder.Face();
+        }
+        else
+        {
+            BRepAlgoAPI_Fuse fuser(res, builder.Face());
+            
+            fuser.SetRunParallel(true);
+            fuser.SetFuzzyValue(1.e-5);
+            fuser.SetNonDestructive(true);
+            fuser.SetGlue(BOPAlgo_GlueShift);
+            fuser.SetCheckInverted(true);
 
-    for (wire_vector::const_iterator it = borders_and_holes[0].second.begin(); it != borders_and_holes[0].second.end(); ++it)
-    {
-        builder.Add(*it);
+            fuser.Build();
+
+            if (fuser.HasErrors())
+            {
+                printf("fuser.HasErrors()\n");
+                fuser.GetReport()->Dump(std::cout);
+                return false;
+            }
+            if (fuser.HasWarnings())
+            {
+                printf("fuser.HasWarnings()\n");
+                fuser.GetReport()->Dump(std::cout);
+            }
+            const TopoDS_Shape& r = fuser.Shape();
+            ShapeUpgrade_UnifySameDomain su(r);
+            su.Build();
+            res = su.Shape();
+        }
     }
-    if (!builder.IsDone())
-    {
-        printf("FATAL ERROR: cBRepBuilderAPI_MakeFace.isDone input file %s\n", path);
-        return false;
-    }
-    res = builder.Face();
     return true;
 }
 
