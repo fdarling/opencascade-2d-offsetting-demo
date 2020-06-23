@@ -5,7 +5,7 @@ simple C++ demo console application that uses Open CASCADE Technology to both of
 
 For the C++ Demo:
 
-* Open CASCADE Technology 7.4.0 (may work with older versions too, not sure about the "Community Edition"...)
+* [Open CASCADE Technology](https://www.opencascade.com/content/latest-release) 7.4.0 (may work with older versions too, not sure about the "Community Edition"...)
 
 For Debian 9 (stretch), the following dependencies needed to be installed to build Open CACADE 7.4.0:
 
